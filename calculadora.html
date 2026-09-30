@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Calculadora</title>
+<style>
+
+    h1 
+    {
+        color: green;
+    }
+    
+    body 
+    {
+    font-family: sans-serif;
+    }
+
+    #pantalla 
+    {
+        width: 200px;
+        height: 40px;
+        font-size: 20px;
+        text-align: right;
+        margin-bottom: 10px;
+    }
+
+    #botones 
+    {
+        display: grid;
+        grid-template-columns: repeat(4, 50px);
+        gap: 5px;
+    }
+
+    #botones button 
+    {
+        height: 40px;
+        font-size: 16px;
+    }
+
+    #historial 
+    {
+        list-style: none;
+        padding: 0;
+    }
+
+    #historial li 
+    {
+    font-size: 14px;
+
+
+  
+  }
+</style>
+</head>
+<body>
+
+  <h1>Calculadora</h1>
+
+  <input type="text" id="pantalla" readonly>
+
+  <div id="botones">
+    <button data-valor="7">7</button>
+    <button data-valor="8">8</button>
+    <button data-valor="9">9</button>
+    <button data-valor="/">/</button>
+
+    <button data-valor="4">4</button>
+    <button data-valor="5">5</button>
+    <button data-valor="6">6</button>
+    <button data-valor="*">*</button>
+
+    <button data-valor="1">1</button>
+    <button data-valor="2">2</button>
+    <button data-valor="3">3</button>
+    <button data-valor="-">-</button>
+
+    <button data-valor="0">0</button>
+    <button data-valor=".">.</button>
+    <button id="igual">=</button>
+    <button data-valor="+">+</button>
+  </div>
+
+  <button id="limpiar">C</button>
+
+  <h2>Historial</h2>
+  <ul id="historial"></ul>
+  <button id="borrarHistorial">Borrar historial</button>
+
+<script>
+  const pantalla = document.getElementById('pantalla');
+  const listaHistorial = document.getElementById('historial');
+  const botonesValor = document.querySelectorAll('#botones button[data-valor]');
+  const botonIgual = document.getElementById('igual');
+  const botonLimpiar = document.getElementById('limpiar');
+  const botonBorrarHistorial = document.getElementById('borrarHistorial');
+
+  let historial = JSON.parse(localStorage.getItem('historial')) || [];
+
+  function guardarHistorial() 
+  {
+    localStorage.setItem('historial', JSON.stringify(historial));
+  }
+
+  function mostrarHistorial() 
+  {
+    listaHistorial.innerHTML = '';
+    historial.forEach(function (item) {
+      const li = document.createElement('li');
+      li.textContent = item;
+      listaHistorial.appendChild(li);
+    });
+  }
+
+  function calcular(expresion) 
+  {
+    const tokens = expresion.match(/(\d+(\.\d+)?)|[+\-*/]/g);
+    if (!tokens) return NaN;
+
+
+    for (let i = 0; i < tokens.length; i++) {
+      if (tokens[i] === '*' || tokens[i] === '/') {
+        const a = parseFloat(tokens[i - 1]);
+        const b = parseFloat(tokens[i + 1]);
+        const r = tokens[i] === '*' ? a * b : a / b;
+        tokens.splice(i - 1, 3, String(r));
+        i = i - 1;
+      }
+    }
+
+    let resultado = parseFloat(tokens[0]);
+    for (let i = 1; i < tokens.length; i += 2) {
+      const operador = tokens[i];
+      const b = parseFloat(tokens[i + 1]);
+      if (operador === '+') resultado += b;
+      else resultado -= b;
+    }
+    return resultado;
+  }
+
+  botonesValor.forEach(function (boton) 
+  {
+    boton.addEventListener('click', function () 
+    {
+      pantalla.value += boton.dataset.valor;
+    });
+  });
+
+  botonIgual.addEventListener('click', function () 
+  {
+    if (pantalla.value === '') return;
+
+    const expresion = pantalla.value;
+    const resultado = calcular(expresion);
+
+    if (!isFinite(resultado)) 
+    {
+      pantalla.value = '';
+      return;
+    }
+
+    historial.push(expresion + ' = ' + resultado);
+    guardarHistorial();
+    mostrarHistorial();
+
+    pantalla.value = resultado;
+  });
+
+  botonLimpiar.addEventListener('click', function () 
+  {
+    pantalla.value = '';
+  });
+
+  botonBorrarHistorial.addEventListener('click', function () 
+  {
+    historial = [];
+    guardarHistorial();
+    mostrarHistorial();
+  });
+
+  mostrarHistorial();
+</script>
+
+</body>
+</html>
