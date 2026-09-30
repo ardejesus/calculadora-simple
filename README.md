@@ -1,5 +1,5 @@
 # calculadora-simple
-Una calculadora con suma, resta, multiplicacion y division. Tiene un historial y un boton para borrar el historial, con persistencia local.
+Una calculadora con suma, resta, multiplicacion y division. Tiene un historial y un boton para borrar el historial, con persistencia local. No es el dise;o mas bonito, pero sirve!
 
 
 
